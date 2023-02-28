@@ -15,8 +15,8 @@ function SoundboardButton(props: SoundboardButtonProps) {
         await props.play();
       }}
       style={{
-        minWidth: "25ch",
-        maxWidth: "25ch",
+        minWidth: "30ch",
+        maxWidth: "30ch",
         justifyContent: "flex-start",
       }}
       variant={"contained"}

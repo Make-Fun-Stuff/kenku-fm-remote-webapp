@@ -35,8 +35,8 @@ function PlaylistButton(props: PlaylistButtonProps) {
         }
       }}
       style={{
-        minWidth: "25ch",
-        maxWidth: "25ch",
+        minWidth: "30ch",
+        maxWidth: "30ch",
         justifyContent: "flex-start",
       }}
       variant={"contained"}
