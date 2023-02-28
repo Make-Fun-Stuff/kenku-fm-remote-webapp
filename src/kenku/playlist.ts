@@ -59,11 +59,11 @@ export const play = async (
 export const getPlayback = async (
   config: KenkuRemoteConfig
 ): Promise<PlaylistPlayback> => {
-  return callKenku(
-    config,
-    { path: "playlist/playback", method: "get", body: undefined },
-    true
-  );
+  return callKenku(config, {
+    path: "playlist/playback",
+    method: "get",
+    body: undefined,
+  });
 };
 
 export const resume = async (config: KenkuRemoteConfig): Promise<{}> => {

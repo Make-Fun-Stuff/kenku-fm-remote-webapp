@@ -1,5 +1,5 @@
 import { Button, Card, TextField, Typography } from "@mui/material";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { useCookies } from "react-cookie";
 import { listPlaylists } from "../../kenku/playlist";
 
@@ -12,7 +12,6 @@ function ConnectUI(props: ConnectUIProps) {
   const [host, setHost] = useState<string>(cookies.host);
   const [port, setPort] = useState<string>(cookies.port);
   const [showError, setShowError] = useState(false);
-  const [loading, setLoading] = useState(true);
 
   const connectionSuccess = props.connectionSuccess;
 
@@ -23,20 +22,11 @@ function ConnectUI(props: ConnectUIProps) {
         await connectionSuccess();
       }
     } catch (error) {
-      setShowError(!loading);
-    } finally {
-      setLoading(false);
+      setShowError(true);
     }
-  }, [connectionSuccess, host, port, loading]);
+  }, [connectionSuccess, host, port]);
 
-  useEffect(() => {
-    const interval = setInterval(testConnection, 500);
-    return () => clearInterval(interval);
-  }, [testConnection]);
-
-  return loading ? (
-    <div />
-  ) : (
+  return (
     <Card
       sx={{ maxWidth: 600, minWidth: 350, marginTop: "20px" }}
       raised={true}

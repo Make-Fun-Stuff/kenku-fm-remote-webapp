@@ -17,7 +17,7 @@ export const callKenku = async (
     method: Method;
     body?: any;
   },
-  quiet?: boolean
+  verbose?: boolean
 ) => {
   const response = await fetch(`${url(config.host, config.port)}/${req.path}`, {
     method: req.method,
@@ -29,7 +29,7 @@ export const callKenku = async (
     body: req.body && JSON.stringify(req.body),
   });
   const data = await response.json();
-  if (!quiet) {
+  if (verbose) {
     console.log(JSON.stringify(data, null, 2));
   }
   return data;

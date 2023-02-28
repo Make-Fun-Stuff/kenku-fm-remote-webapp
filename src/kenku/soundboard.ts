@@ -45,11 +45,11 @@ export const listSoundboards = async (
 export const getPlayback = async (
   config: KenkuRemoteConfig
 ): Promise<SoundboardPlayback> => {
-  return callKenku(
-    config,
-    { path: "soundboard/playback", method: "get", body: undefined },
-    true
-  );
+  return callKenku(config, {
+    path: "soundboard/playback",
+    method: "get",
+    body: undefined,
+  });
 };
 
 export const play = async (
