@@ -1,5 +1,4 @@
 import {
-  Button,
   Paper,
   Table,
   TableBody,
@@ -7,6 +6,7 @@ import {
   TableHead,
   TableRow,
   Typography,
+  IconButton,
 } from "@mui/material";
 import TableCell, { tableCellClasses } from "@mui/material/TableCell";
 import { styled } from "@mui/material/styles";
@@ -22,6 +22,7 @@ import {
 import { sortBy } from "lodash";
 import { useCookies } from "react-cookie";
 import { KenkuRemoteConfig } from "../../kenku/kenku";
+import { MergeRounded, PlayArrowRounded } from "@mui/icons-material";
 
 export interface SoundboardsProps {
   connectionFailure: () => void;
@@ -90,24 +91,20 @@ function Soundboards(props: SoundboardsProps) {
       style={{
         marginTop: "50px",
         marginBottom: "50px",
-        marginLeft: "30px",
-        marginRight: "30px",
+        marginLeft: "10px",
+        marginRight: "10px",
       }}
     >
       <Typography variant="h5" marginBottom={"20px"}>
-        Sound Effects
+        Soundboards
       </Typography>
       <TableContainer component={Paper}>
-        <Table sx={{ minWidth: 650 }} aria-label="simple table">
+        <Table sx={{ minWidth: 350 }} aria-label="simple table">
           <TableHead>
             <TableRow>
-              <StyledTableCell>Sound Effect Group</StyledTableCell>
-              <StyledTableCell align="center">
-                Add to Current Sound Effects
-              </StyledTableCell>
-              <StyledTableCell align="center">
-                Replace Current Sound Effects
-              </StyledTableCell>
+              <StyledTableCell>Soundboard</StyledTableCell>
+              <StyledTableCell align="center">Add</StyledTableCell>
+              <StyledTableCell align="center">Replace</StyledTableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -123,22 +120,20 @@ function Soundboards(props: SoundboardsProps) {
                   {soundboard.title.toUpperCase()}
                 </StyledTableCell>
                 <StyledTableCell component="th" scope="row" align="center">
-                  <Button
-                    variant="contained"
+                  <IconButton
                     disabled={!soundboard.sounds.length}
                     onClick={() => playSoundEffects(soundboard, false)}
                   >
-                    Add
-                  </Button>
+                    <MergeRounded />
+                  </IconButton>
                 </StyledTableCell>
                 <StyledTableCell component="th" scope="row" align="center">
-                  <Button
-                    variant="contained"
+                  <IconButton
                     disabled={!soundboard.sounds.length}
                     onClick={() => playSoundEffects(soundboard, true)}
                   >
-                    Replace
-                  </Button>
+                    <PlayArrowRounded />
+                  </IconButton>
                 </StyledTableCell>
               </TableRow>
             ))}
