@@ -1,5 +1,5 @@
 import { Button, Card, TextField, Typography } from "@mui/material";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { useCookies } from "react-cookie";
 import { listPlaylists } from "../../kenku/playlist";
 
@@ -25,10 +25,6 @@ function ConnectUI(props: ConnectUIProps) {
       setShowError(true);
     }
   }, [connectionSuccess, host, port]);
-
-  useEffect(() => {
-    testConnection().catch(console.error);
-  });
 
   return (
     <Card
