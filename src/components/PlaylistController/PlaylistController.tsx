@@ -9,6 +9,8 @@ import {
   Grid,
   IconButton,
   LinearProgress,
+  Slider,
+  Stack,
   Typography,
 } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
@@ -21,6 +23,7 @@ import {
   setShuffle,
   skipToNext,
   skipToPrevious,
+  updateVolume,
 } from "../../kenku/playlist";
 import {
   Repeat,
@@ -28,6 +31,8 @@ import {
   RepeatOneOn,
   Shuffle,
   ShuffleOn,
+  VolumeDownRounded,
+  VolumeUpRounded,
 } from "@mui/icons-material";
 import { KenkuRemoteConfig } from "../../kenku/kenku";
 import { useCookies } from "react-cookie";
@@ -36,10 +41,13 @@ export interface PlaylistControllerProps {
   connectionFailure: () => void;
 }
 
+const VOLUME_BUTTON_DELTA = 20;
+
 function PlaylistController(props: PlaylistControllerProps) {
   const [playback, setPlayback] = useState<PlaylistPlayback>();
   const [showError, setShowError] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [volume, setVolume] = useState<number>(0);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [cookies, _setCookie] = useCookies(["host", "port"]);
   const kenkuConfig: KenkuRemoteConfig = useMemo(
@@ -51,6 +59,15 @@ function PlaylistController(props: PlaylistControllerProps) {
   );
 
   const connectionFailure = props.connectionFailure;
+
+  useEffect(() => {
+    const setInitialVolume = async () => {
+      const playback = await getPlayback(kenkuConfig);
+      setVolume(Math.round(playback.volume * 100));
+    };
+
+    setInitialVolume().catch(console.error);
+  }, []);
 
   useEffect(() => {
     const interval = setInterval(async () => {
@@ -110,7 +127,7 @@ function PlaylistController(props: PlaylistControllerProps) {
                   )}
                 />
               </CardContent>
-              <Box sx={{ alignItems: "center", pl: 1, pb: 1 }}>
+              <Box sx={{ alignItems: "center" }}>
                 <IconButton
                   aria-label="shuffle"
                   onClick={async (_) => {
@@ -170,6 +187,63 @@ function PlaylistController(props: PlaylistControllerProps) {
                   )}
                 </IconButton>
               </Box>
+              <Stack
+                spacing={2}
+                direction="row"
+                sx={{
+                  marginRight: "25%",
+                  marginLeft: "25%",
+                }}
+                alignItems="center"
+              >
+                <IconButton
+                  aria-label="volume-up"
+                  onClick={async (_) => {
+                    if (volume > 0) {
+                      const newVolume = Math.max(
+                        volume - VOLUME_BUTTON_DELTA,
+                        0
+                      );
+                      setVolume(newVolume);
+                      await updateVolume(
+                        kenkuConfig,
+                        Math.max(newVolume / 100, 0)
+                      );
+                    }
+                  }}
+                >
+                  <VolumeDownRounded />
+                </IconButton>
+                <Slider
+                  size="small"
+                  aria-label="volume"
+                  value={volume}
+                  onChange={(_, value) => {
+                    setVolume(value as number);
+                  }}
+                  onChangeCommitted={async (_) => {
+                    await updateVolume(kenkuConfig, volume / 100);
+                  }}
+                />
+                <IconButton
+                  aria-label="volume-up"
+                  onClick={async (_) => {
+                    if (volume < 100) {
+                      const newVolume = Math.min(
+                        volume + VOLUME_BUTTON_DELTA,
+                        100
+                      );
+                      setVolume(newVolume);
+                      await updateVolume(
+                        kenkuConfig,
+                        Math.min(newVolume / 100, 1)
+                      );
+                    }
+                  }}
+                >
+                  <VolumeUpRounded />
+                </IconButton>
+              </Stack>
             </div>
           )}
         </Card>

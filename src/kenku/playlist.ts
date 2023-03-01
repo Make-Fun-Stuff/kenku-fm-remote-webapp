@@ -125,3 +125,16 @@ export const setRepeat = async (
     },
   });
 };
+
+export const updateVolume = async (
+  config: KenkuRemoteConfig,
+  volume: number // between 0 and 1
+): Promise<{}> => {
+  return callKenku(config, {
+    path: "playlist/playback/volume",
+    method: "put",
+    body: {
+      volume,
+    },
+  });
+};

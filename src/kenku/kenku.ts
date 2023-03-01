@@ -1,6 +1,3 @@
-// const host = "192.168.86.46";
-// const port = "3334";
-
 const url = (host: string, port: string) => `http://${host}:${port}/v1`;
 
 type Method = "get" | "put" | "post";
