@@ -99,7 +99,7 @@ function Soundboards(props: SoundboardsProps) {
         Soundboards
       </Typography>
       <TableContainer component={Paper}>
-        <Table sx={{ minWidth: 350 }} aria-label="simple table">
+        <Table sx={{ minWidth: 350 }} size="small" aria-label="simple table">
           <TableHead>
             <TableRow>
               <StyledTableCell>Soundboard</StyledTableCell>
