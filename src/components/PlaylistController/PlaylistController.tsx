@@ -48,6 +48,7 @@ function PlaylistController(props: PlaylistControllerProps) {
   const [showError, setShowError] = useState(false);
   const [loading, setLoading] = useState(true);
   const [volume, setVolume] = useState<number>(0);
+  const [touchingVolume, setTouchingVolume] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [cookies, _setCookie] = useCookies(["host", "port"]);
   const kenkuConfig: KenkuRemoteConfig = useMemo(
@@ -72,7 +73,11 @@ function PlaylistController(props: PlaylistControllerProps) {
   useEffect(() => {
     const interval = setInterval(async () => {
       try {
-        setPlayback(await getPlayback(kenkuConfig));
+        const newPlayback = await getPlayback(kenkuConfig);
+        setPlayback(newPlayback);
+        if (!touchingVolume) {
+          setVolume(Math.round(newPlayback.volume * 100));
+        }
         setShowError(false);
       } catch (error) {
         setShowError(true);
@@ -83,7 +88,7 @@ function PlaylistController(props: PlaylistControllerProps) {
     }, 500);
 
     return () => clearInterval(interval);
-  }, [kenkuConfig, connectionFailure]);
+  }, [kenkuConfig, connectionFailure, touchingVolume]);
 
   return (
     <Grid
@@ -219,9 +224,11 @@ function PlaylistController(props: PlaylistControllerProps) {
                   aria-label="volume"
                   value={volume}
                   onChange={(_, value) => {
+                    setTouchingVolume(true);
                     setVolume(value as number);
                   }}
                   onChangeCommitted={async (_) => {
+                    setTouchingVolume(false);
                     await updateVolume(kenkuConfig, volume / 100);
                   }}
                 />

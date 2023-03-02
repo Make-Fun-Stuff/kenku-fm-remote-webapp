@@ -75,7 +75,6 @@ function Soundboards(props: SoundboardsProps) {
   const groupedSoundboards = soundboards.soundboards.reduce(
     (grouped, soundboard) => {
       const index = soundboard.title.indexOf("-");
-      console.log(`${soundboard.title}, ${index}`);
       if (index < 0) {
         return {
           ...grouped,
