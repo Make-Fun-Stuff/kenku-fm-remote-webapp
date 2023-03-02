@@ -6,15 +6,11 @@ import {
   TableHead,
   TableRow,
   Typography,
-  IconButton,
 } from "@mui/material";
 import TableCell, { tableCellClasses } from "@mui/material/TableCell";
 import { styled } from "@mui/material/styles";
 import { useEffect, useMemo, useState } from "react";
 import {
-  play,
-  stop,
-  getPlayback,
   listSoundboards,
   ListSoundboardsResponse,
   Soundboard,
@@ -22,7 +18,7 @@ import {
 import { sortBy } from "lodash";
 import { useCookies } from "react-cookie";
 import { KenkuRemoteConfig } from "../../kenku/kenku";
-import { MergeRounded, PlayArrowRounded } from "@mui/icons-material";
+import SoundboardRow from "../SoundboardRow/SoundboardRow";
 
 export interface SoundboardsProps {
   connectionFailure: () => void;
@@ -76,13 +72,30 @@ function Soundboards(props: SoundboardsProps) {
     return <div />;
   }
 
-  const playSoundEffects = async (soundboard: Soundboard, replace: boolean) => {
-    if (replace) {
-      const playback = await getPlayback(kenkuConfig);
-      await Promise.all(playback.sounds.map((_) => stop(kenkuConfig, _.id)));
-    }
-    await Promise.all(soundboard.sounds.map((_) => play(kenkuConfig, _)));
-  };
+  const groupedSoundboards = soundboards.soundboards.reduce(
+    (grouped, soundboard) => {
+      const index = soundboard.title.indexOf("-");
+      console.log(`${soundboard.title}, ${index}`);
+      if (index < 0) {
+        return {
+          ...grouped,
+          [soundboard.title]: [soundboard],
+        };
+      }
+      const group = soundboard.title.slice(0, index).trim();
+      return {
+        ...grouped,
+        [group]: [
+          ...(grouped[group] || []),
+          {
+            ...soundboard,
+            title: soundboard.title.slice(index + 1).trim(),
+          },
+        ],
+      };
+    },
+    {} as Record<string, Soundboard[]>
+  );
 
   return hadError ? (
     <div />
@@ -103,39 +116,24 @@ function Soundboards(props: SoundboardsProps) {
           <TableHead>
             <TableRow>
               <StyledTableCell>Soundboard</StyledTableCell>
+              <StyledTableCell />
               <StyledTableCell align="center">Add</StyledTableCell>
               <StyledTableCell align="center">Replace</StyledTableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {sortBy(
-              soundboards.soundboards,
-              (_) => `${_.sounds.length ? "" : "zzz"}${_.title}`
-            ).map((soundboard, index) => (
-              <TableRow
+            {sortBy(Object.keys(groupedSoundboards), (group) => {
+              return `${
+                !groupedSoundboards[group].some((_) => !!_.sounds.length)
+                  ? "zzz"
+                  : ""
+              }${group}`;
+            }).map((groupName, index) => (
+              <SoundboardRow
                 key={index}
-                sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-              >
-                <StyledTableCell component="th" scope="row">
-                  {soundboard.title.toUpperCase()}
-                </StyledTableCell>
-                <StyledTableCell component="th" scope="row" align="center">
-                  <IconButton
-                    disabled={!soundboard.sounds.length}
-                    onClick={() => playSoundEffects(soundboard, false)}
-                  >
-                    <MergeRounded />
-                  </IconButton>
-                </StyledTableCell>
-                <StyledTableCell component="th" scope="row" align="center">
-                  <IconButton
-                    disabled={!soundboard.sounds.length}
-                    onClick={() => playSoundEffects(soundboard, true)}
-                  >
-                    <PlayArrowRounded />
-                  </IconButton>
-                </StyledTableCell>
-              </TableRow>
+                groupName={groupName}
+                soundboards={groupedSoundboards[groupName]}
+              />
             ))}
           </TableBody>
         </Table>
