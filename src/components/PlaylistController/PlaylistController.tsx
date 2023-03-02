@@ -67,7 +67,7 @@ function PlaylistController(props: PlaylistControllerProps) {
     };
 
     setInitialVolume().catch(console.error);
-  }, []);
+  }, [kenkuConfig]);
 
   useEffect(() => {
     const interval = setInterval(async () => {

@@ -1,9 +1,23 @@
-import { Card, CardContent, Grid, IconButton, Typography } from "@mui/material";
+import {
+  Button,
+  Card,
+  CardContent,
+  Grid,
+  IconButton,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableRow,
+  Typography,
+} from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
 import { Stop } from "@mui/icons-material";
 import { getPlayback, SoundboardPlayback, stop } from "../../kenku/soundboard";
 import { useCookies } from "react-cookie";
 import { KenkuRemoteConfig } from "../../kenku/kenku";
+import { sortBy } from "lodash";
 
 export interface SoundboardControllerProps {
   connectionFailure: () => void;
@@ -74,31 +88,51 @@ function SoundboardController(props: SoundboardControllerProps) {
                 <Typography variant="h5" gutterBottom>
                   Sound Effects
                 </Typography>
-                {!playback.sounds.length ? (
-                  <Typography variant="subtitle2" gutterBottom>
-                    Nothing currently playing
-                  </Typography>
-                ) : (
-                  playback.sounds.map((sound, index) => {
-                    return (
-                      <Typography key={index} variant="subtitle2">
-                        {sound.title}
-                      </Typography>
-                    );
-                  })
-                )}
+                <TableContainer component={Paper}>
+                  <Table size="small" aria-label="active-sounds-table">
+                    <TableBody>
+                      {sortBy(playback.sounds, (_) => _.title).map(
+                        (sound, index) => (
+                          <TableRow key={index}>
+                            <TableCell component="th" scope="row">
+                              {sound.title.toUpperCase()}
+                            </TableCell>
+                            <TableCell
+                              component="th"
+                              scope="row"
+                              align="center"
+                            >
+                              <IconButton
+                                onClick={async () => {
+                                  await stop(kenkuConfig, sound.id);
+                                }}
+                              >
+                                <Stop />
+                              </IconButton>
+                            </TableCell>
+                          </TableRow>
+                        )
+                      )}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
               </CardContent>
               {!!playback.sounds.length && (
-                <IconButton
-                  aria-label="stop"
+                <Button
+                  aria-label="stop-all"
+                  size="large"
+                  color="error"
+                  variant="contained"
+                  sx={{ marginBottom: "10px" }}
                   onClick={async (_) => {
                     await Promise.all(
                       playback.sounds.map((_) => stop(kenkuConfig, _.id))
                     );
                   }}
+                  startIcon={<Stop />}
                 >
-                  <Stop sx={{ height: 38, width: 38 }} />
-                </IconButton>
+                  Stop All
+                </Button>
               )}
             </div>
           )}
