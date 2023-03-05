@@ -26,6 +26,9 @@ export const callKenku = async (
     body: req.body && JSON.stringify(req.body),
   });
   const data = await response.json();
+  if (response.status >= 400) {
+    throw Error(data);
+  }
   if (verbose) {
     console.log(JSON.stringify(data, null, 2));
   }
