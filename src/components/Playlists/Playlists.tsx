@@ -72,15 +72,13 @@ function Playlists(props: PlaylistsProps) {
     return <div />;
   }
 
-  let itemWidth = 2;
+  let itemWidth = 3;
   if (windowDimensions.width < 500) {
     itemWidth = 12;
   } else if (windowDimensions.width < 750) {
     itemWidth = 6;
-  } else if (windowDimensions.width < 1000) {
+  } else if (windowDimensions.width < 2000) {
     itemWidth = 4;
-  } else if (windowDimensions.width < 1700) {
-    itemWidth = 3;
   }
 
   return hadError ? (
