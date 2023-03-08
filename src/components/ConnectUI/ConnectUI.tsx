@@ -1,5 +1,5 @@
 import { Button, Card, TextField, Typography } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useCookies } from "react-cookie";
 import { listPlaylists } from "../../kenku/playlist";
 
@@ -15,20 +15,20 @@ function ConnectUI(props: ConnectUIProps) {
 
   const connectionSuccess = props.connectionSuccess;
 
-  useEffect(() => {
-    const checkSavedConfig = async () => {
-      try {
-        if (cookies.host && cookies.port) {
-          await listPlaylists({ host: cookies.host, port: cookies.port });
-          await connectionSuccess();
-        }
-      } catch (error) {
-        setShowError(true);
+  const checkConnection = useCallback(async () => {
+    try {
+      if (cookies.host && cookies.port) {
+        await listPlaylists({ host: cookies.host, port: cookies.port });
+        await connectionSuccess();
       }
-    };
-
-    checkSavedConfig().catch(console.error);
+    } catch (error) {
+      setShowError(true);
+    }
   }, [cookies, connectionSuccess]);
+
+  useEffect(() => {
+    checkConnection().catch(console.error);
+  }, [checkConnection]);
 
   return (
     <Card
@@ -70,7 +70,7 @@ function ConnectUI(props: ConnectUIProps) {
           onClick={async () => {
             setCookie("host", host);
             setCookie("port", port);
-            // await testConnection();
+            await checkConnection();
           }}
         >
           Connect
