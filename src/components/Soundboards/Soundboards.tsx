@@ -131,7 +131,10 @@ function Soundboards(props: SoundboardsProps) {
               <SoundboardRow
                 key={index}
                 groupName={groupName}
-                soundboards={groupedSoundboards[groupName]}
+                soundboards={sortBy(
+                  groupedSoundboards[groupName],
+                  (_) => _.title
+                )}
               />
             ))}
           </TableBody>
