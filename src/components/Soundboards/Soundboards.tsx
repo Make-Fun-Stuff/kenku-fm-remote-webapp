@@ -18,7 +18,7 @@ import {
 import { sortBy } from "lodash";
 import { useCookies } from "react-cookie";
 import { KenkuRemoteConfig } from "../../kenku/kenku";
-import SoundboardRow from "../SoundboardRow/SoundboardRow";
+import SoundboardRow from "./SoundboardRow";
 
 export interface SoundboardsProps {
   connectionFailure: () => void;

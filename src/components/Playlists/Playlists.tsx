@@ -1,24 +1,28 @@
-import { PlayArrowRounded } from "@mui/icons-material";
-import { Button, Grid, Typography } from "@mui/material";
-import { sortBy } from "lodash";
+import {
+  Button,
+  Grid,
+  Paper,
+  Table,
+  TableBody,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography,
+} from "@mui/material";
+import TableCell, { tableCellClasses } from "@mui/material/TableCell";
+import { styled } from "@mui/material/styles";
 import { useEffect, useMemo, useState } from "react";
-import { useCookies } from "react-cookie";
-import { KenkuRemoteConfig } from "../../kenku/kenku";
 import {
   listPlaylists,
   ListPlaylistsResponse,
-  Playlist,
   play,
+  Playlist,
 } from "../../kenku/playlist";
-import PlaylistButton from "../PlaylistButton/PlaylistButton";
-
-function getWindowDimensions() {
-  const { innerWidth: width, innerHeight: height } = window;
-  return {
-    width,
-    height,
-  };
-}
+import { sortBy } from "lodash";
+import { useCookies } from "react-cookie";
+import { KenkuRemoteConfig } from "../../kenku/kenku";
+import PlaylistRow from "./PlaylistRow";
+import { PlayArrowRounded } from "@mui/icons-material";
 
 export interface PlaylistsProps {
   connectionFailure: () => void;
@@ -26,17 +30,24 @@ export interface PlaylistsProps {
 
 const NUM_RECENT = 2;
 
+const StyledTableCell = styled(TableCell)(({ theme }) => ({
+  [`&.${tableCellClasses.head}`]: {
+    backgroundColor: theme.palette.primary.dark,
+    color: theme.palette.common.white,
+  },
+  [`&.${tableCellClasses.body}`]: {
+    fontSize: 14,
+  },
+}));
+
 function Playlists(props: PlaylistsProps) {
   const [loading, setLoading] = useState(true);
   const [hadError, setHadError] = useState(false);
-  const [mostRecent, setMostRecent] = useState<Playlist[]>([]);
   const [playlists, setPlaylists] = useState<ListPlaylistsResponse>({
     playlists: [],
     tracks: [],
   });
-  const [windowDimensions, setWindowDimensions] = useState(
-    getWindowDimensions()
-  );
+  const [mostRecent, setMostRecent] = useState<Playlist[]>([]);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [cookies, _setCookie] = useCookies(["host", "port"]);
   const kenkuConfig: KenkuRemoteConfig = useMemo(
@@ -64,15 +75,6 @@ function Playlists(props: PlaylistsProps) {
     return () => clearInterval(interval);
   }, [kenkuConfig, connectionFailure]);
 
-  useEffect(() => {
-    function handleResize() {
-      setWindowDimensions(getWindowDimensions());
-    }
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
   const updateMostRecent = (newPlaylist: Playlist) => {
     setMostRecent([newPlaylist, ...mostRecent.slice(0, NUM_RECENT)]);
   };
@@ -81,14 +83,26 @@ function Playlists(props: PlaylistsProps) {
     return <div />;
   }
 
-  let itemWidth = 3;
-  if (windowDimensions.width < 500) {
-    itemWidth = 12;
-  } else if (windowDimensions.width < 750) {
-    itemWidth = 6;
-  } else if (windowDimensions.width < 2000) {
-    itemWidth = 4;
-  }
+  const groupedPlaylists = playlists.playlists.reduce((grouped, playlist) => {
+    const index = playlist.title.indexOf("-");
+    if (index < 0) {
+      return {
+        ...grouped,
+        [playlist.title]: [playlist],
+      };
+    }
+    const group = playlist.title.slice(0, index).trim();
+    return {
+      ...grouped,
+      [group]: [
+        ...(grouped[group] || []),
+        {
+          ...playlist,
+          title: playlist.title,
+        },
+      ],
+    };
+  }, {} as Record<string, Playlist[]>);
 
   return hadError ? (
     <div />
@@ -96,6 +110,9 @@ function Playlists(props: PlaylistsProps) {
     <div
       style={{
         marginTop: "50px",
+        marginBottom: "50px",
+        marginLeft: "10px",
+        marginRight: "10px",
       }}
     >
       <Typography variant="h5" marginBottom={"20px"}>
@@ -121,10 +138,8 @@ function Playlists(props: PlaylistsProps) {
                 startIcon={<PlayArrowRounded />}
                 variant="contained"
                 sx={{
-                  width: "90%",
+                  width: "95%",
                   height: "75px",
-                  marginLeft: "5%",
-                  marginRight: "5%",
                 }}
                 onClick={async () => {
                   await play(kenkuConfig, playlist.id);
@@ -137,24 +152,35 @@ function Playlists(props: PlaylistsProps) {
           );
         })}
       </Grid>
-      <Grid container spacing={2}>
-        {sortBy(
-          playlists.playlists,
-          (_) => `${_.tracks.length ? "" : "zzz"}${_.title}`
-        ).map((playlist, index) => {
-          return (
-            <Grid item xs={itemWidth} key={index}>
-              <PlaylistButton
-                playlist={playlist}
-                play={async () => {
-                  await play(kenkuConfig, playlist.id);
-                  updateMostRecent(playlist);
-                }}
+      <TableContainer component={Paper}>
+        <Table sx={{ minWidth: 350 }} size="small" aria-label="simple table">
+          <TableHead>
+            <TableRow>
+              <StyledTableCell>Playlist</StyledTableCell>
+              <StyledTableCell />
+              <StyledTableCell align="center">Play</StyledTableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {sortBy(Object.keys(groupedPlaylists), (group) => {
+              return `${
+                !groupedPlaylists[group].some((_) => !!_.tracks.length)
+                  ? "zzz"
+                  : ""
+              }${group}`;
+            }).map((groupName, index) => (
+              <PlaylistRow
+                key={index}
+                groupName={groupName}
+                playlists={sortBy(groupedPlaylists[groupName], (_) => _.title)}
+                onPlay={async (playlist: Playlist) =>
+                  updateMostRecent(playlist)
+                }
               />
-            </Grid>
-          );
-        })}
-      </Grid>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
     </div>
   );
 }
