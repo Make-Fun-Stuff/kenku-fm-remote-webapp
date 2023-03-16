@@ -1,4 +1,5 @@
-import { Grid, Typography } from "@mui/material";
+import { PlayArrowRounded } from "@mui/icons-material";
+import { Button, Grid, Typography } from "@mui/material";
 import { sortBy } from "lodash";
 import { useEffect, useMemo, useState } from "react";
 import { useCookies } from "react-cookie";
@@ -6,6 +7,7 @@ import { KenkuRemoteConfig } from "../../kenku/kenku";
 import {
   listPlaylists,
   ListPlaylistsResponse,
+  Playlist,
   play,
 } from "../../kenku/playlist";
 import PlaylistButton from "../PlaylistButton/PlaylistButton";
@@ -22,9 +24,12 @@ export interface PlaylistsProps {
   connectionFailure: () => void;
 }
 
+const NUM_RECENT = 2;
+
 function Playlists(props: PlaylistsProps) {
   const [loading, setLoading] = useState(true);
   const [hadError, setHadError] = useState(false);
+  const [mostRecent, setMostRecent] = useState<Playlist[]>([]);
   const [playlists, setPlaylists] = useState<ListPlaylistsResponse>({
     playlists: [],
     tracks: [],
@@ -68,6 +73,10 @@ function Playlists(props: PlaylistsProps) {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  const updateMostRecent = (newPlaylist: Playlist) => {
+    setMostRecent([newPlaylist, ...mostRecent.slice(0, NUM_RECENT)]);
+  };
+
   if (loading) {
     return <div />;
   }
@@ -92,17 +101,54 @@ function Playlists(props: PlaylistsProps) {
       <Typography variant="h5" marginBottom={"20px"}>
         Music
       </Typography>
+      <Grid
+        container
+        direction="row"
+        alignItems="center"
+        justifyContent="center"
+        marginBottom={"30px"}
+      >
+        {mostRecent.slice(1).map((playlist, index) => {
+          return (
+            <Grid
+              item
+              key={index}
+              xs={Math.floor(12 / NUM_RECENT)}
+              alignItems="center"
+              justifyContent="center"
+            >
+              <Button
+                startIcon={<PlayArrowRounded />}
+                variant="contained"
+                sx={{
+                  width: "90%",
+                  height: "75px",
+                  marginLeft: "5%",
+                  marginRight: "5%",
+                }}
+                onClick={async () => {
+                  await play(kenkuConfig, playlist.id);
+                  updateMostRecent(playlist);
+                }}
+              >
+                {playlist.title}
+              </Button>
+            </Grid>
+          );
+        })}
+      </Grid>
       <Grid container spacing={2}>
         {sortBy(
           playlists.playlists,
           (_) => `${_.tracks.length ? "" : "zzz"}${_.title}`
-        ).map((_, index) => {
+        ).map((playlist, index) => {
           return (
             <Grid item xs={itemWidth} key={index}>
               <PlaylistButton
-                playlist={_}
+                playlist={playlist}
                 play={async () => {
-                  await play(kenkuConfig, _.id);
+                  await play(kenkuConfig, playlist.id);
+                  updateMostRecent(playlist);
                 }}
               />
             </Grid>
