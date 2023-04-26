@@ -45,7 +45,7 @@ function SaveSceneButton() {
                 sx={{ width: "70%" }}
                 label="Scene Name"
                 onChange={(event) => {
-                  setInput(event.target.value.trim());
+                  setInput(event.target.value);
                 }}
               />
               <Button
@@ -62,7 +62,7 @@ function SaveSceneButton() {
                   );
                   try {
                     await addScene({
-                      name: input,
+                      name: input.trim(),
                       playlistId: playlistPlayback.playlist
                         ? playlistPlayback.playlist.id
                         : undefined,
