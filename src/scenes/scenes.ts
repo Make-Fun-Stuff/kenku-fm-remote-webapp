@@ -1,6 +1,13 @@
 import { KenkuRemoteConfig } from "../kenku/kenku";
-import { play as playPlaylist } from "../kenku/playlist";
-import { getPlayback, play as playSoundboard, stop } from "../kenku/soundboard";
+import {
+  getPlayback as getPlaylistPlayback,
+  play as playPlaylist,
+} from "../kenku/playlist";
+import {
+  getPlayback as getSoundboardPlaylist,
+  play as playSoundboard,
+  stop,
+} from "../kenku/soundboard";
 const Cookie = require("js-cookie");
 
 export interface Scene {
@@ -40,19 +47,29 @@ export const playScene = async (config: KenkuRemoteConfig, name: string) => {
   }
 
   // stop current sounds
-  const playback = await getPlayback(config);
-  for (const sound of playback.sounds) {
+  const soundboardPlayback = await getSoundboardPlaylist(config);
+  for (const sound of soundboardPlayback.sounds.filter(
+    (_) => !(scene.soundboardIds || []).includes(_.id)
+  )) {
     await stop(config, sound.id);
   }
 
   // play playlist
   if (scene.playlistId) {
-    await playPlaylist(config, scene.playlistId);
+    const playlistPlayback = await getPlaylistPlayback(config);
+    if (
+      playlistPlayback.playlist &&
+      playlistPlayback.playlist.id !== scene.playlistId
+    ) {
+      await playPlaylist(config, scene.playlistId);
+    }
   }
 
   // play sounds
   if (scene.soundboardIds) {
-    for (const soundId of scene.soundboardIds) {
+    for (const soundId of scene.soundboardIds.filter(
+      (id) => !soundboardPlayback.sounds.map((_) => _.id).includes(id)
+    )) {
       await playSoundboard(config, soundId);
     }
   }
