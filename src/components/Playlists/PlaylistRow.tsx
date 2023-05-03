@@ -64,9 +64,10 @@ function PlaylistRow(props: PlaylistRowProps) {
               )
             }
           >
-            {props.playlists.map((playlist) => {
+            {props.playlists.map((playlist, index) => {
               return (
                 <MenuItem
+                  key={index}
                   value={playlist.title}
                   disabled={!playlist.tracks.length}
                 >

@@ -65,9 +65,10 @@ function SoundboardRow(props: SoundboardRowProps) {
               )
             }
           >
-            {props.soundboards.map((soundboard) => {
+            {props.soundboards.map((soundboard, index) => {
               return (
                 <MenuItem
+                  key={index}
                   value={soundboard.title}
                   disabled={!soundboard.sounds.length}
                 >
