@@ -25,7 +25,7 @@ function SceneRow(props: SceneRowProps) {
       <TableCell component="th" scope="row">
         <IconButton
           onClick={async () => {
-            await deleteScene(props.scene.name);
+            await deleteScene(props.scene.id);
           }}
         >
           <DeleteRounded />
@@ -37,7 +37,7 @@ function SceneRow(props: SceneRowProps) {
       <TableCell component="th" scope="row" align="center">
         <IconButton
           onClick={async () => {
-            await playScene(kenkuConfig, props.scene.name);
+            await playScene(kenkuConfig, props.scene);
           }}
         >
           <PlayArrowRounded />
