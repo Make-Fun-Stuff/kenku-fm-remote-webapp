@@ -109,7 +109,7 @@ export const playScene = async (config: KenkuRemoteConfig, scene: Scene) => {
   if (scene.playlistId) {
     const playlistPlayback = await getPlaylistPlayback(config);
     if (
-      playlistPlayback.playlist &&
+      !playlistPlayback.playlist ||
       playlistPlayback.playlist.id !== scene.playlistId
     ) {
       await playPlaylist(config, scene.playlistId);
