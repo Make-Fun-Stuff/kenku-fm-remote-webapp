@@ -50,7 +50,7 @@ function Scenes() {
   const scenes = campaign ? campaignScenes[campaign] : [];
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [cookies, _setCookie] = useCookies(["host", "port"]);
+  const [cookies, setCookie] = useCookies(["host", "port", "campaign"]);
   const kenkuConfig: KenkuRemoteConfig = useMemo(
     () => ({
       host: cookies.host,
@@ -63,11 +63,15 @@ function Scenes() {
     if (!campaign) {
       const setDefaultCampaign = async () => {
         const listResponse = await listScenes();
-        setCampaign(Object.keys(listResponse).sort()[0]);
+        if (cookies.campaign && listResponse.hasOwnProperty(cookies.campaign)) {
+          setCampaign(cookies.campaign);
+        } else {
+          setCampaign(Object.keys(listResponse).sort()[0]);
+        }
       };
       setDefaultCampaign();
     }
-  }, [campaign, setCampaign]);
+  }, [campaign, setCampaign, cookies.campaign]);
 
   useEffect(() => {
     const interval = setInterval(async () => {
@@ -113,6 +117,11 @@ function Scenes() {
           sx={{ width: "100%" }}
           onChange={(event: SelectChangeEvent) => {
             setCampaign(event.target.value);
+            const cookieExpiry = new Date();
+            cookieExpiry.setFullYear(new Date().getFullYear() + 1);
+            setCookie("campaign", event.target.value, {
+              expires: cookieExpiry,
+            });
           }}
         >
           {Object.keys(campaignScenes)

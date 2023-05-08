@@ -68,8 +68,10 @@ function ConnectUI(props: ConnectUIProps) {
           variant="contained"
           sx={{ mt: 3, mb: 2 }}
           onClick={async () => {
-            setCookie("host", host);
-            setCookie("port", port);
+            const cookieExpiry = new Date();
+            cookieExpiry.setFullYear(new Date().getFullYear() + 1);
+            setCookie("host", host, { expires: cookieExpiry });
+            setCookie("port", port, { expires: cookieExpiry });
             await checkConnection();
           }}
         >
