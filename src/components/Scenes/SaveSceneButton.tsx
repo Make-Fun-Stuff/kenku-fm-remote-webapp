@@ -1,5 +1,6 @@
 import { SaveRounded } from "@mui/icons-material";
 import {
+  Alert,
   Button,
   Card,
   CardContent,
@@ -11,12 +12,15 @@ import { useCookies } from "react-cookie";
 import { getPlayback as getPlaylistPlayback } from "../../kenku/playlist";
 import { getPlayback as getSoundboardPlayback } from "../../kenku/soundboard";
 import { KenkuRemoteConfig } from "../../kenku/kenku";
-import { useMemo, useState } from "react";
+import { useContext, useMemo, useState } from "react";
 import { addScene } from "../../scenes/scenes";
+import { CampaignContext, CampaignContextType } from "../../App";
 
 function SaveSceneButton() {
   const [input, setInput] = useState<string>("");
   const [error, setError] = useState<string | undefined>();
+  const { campaign } = useContext(CampaignContext) as CampaignContextType;
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [cookies, _setCookie] = useCookies(["host", "port"]);
   const kenkuConfig: KenkuRemoteConfig = useMemo(
@@ -52,7 +56,7 @@ function SaveSceneButton() {
                 sx={{ width: "25%", ml: "5%" }}
                 type="submit"
                 variant="contained"
-                disabled={!input.trim().length}
+                disabled={!input.trim().length || !campaign}
                 onClick={async () => {
                   const playlistPlayback = await getPlaylistPlayback(
                     kenkuConfig
@@ -61,7 +65,7 @@ function SaveSceneButton() {
                     kenkuConfig
                   );
                   try {
-                    await addScene({
+                    await addScene(campaign!, {
                       name: input.trim(),
                       playlistId: playlistPlayback.playlist
                         ? playlistPlayback.playlist.id
@@ -84,8 +88,11 @@ function SaveSceneButton() {
               </Button>
             </Grid>
             <i>
-              <Typography variant="subtitle1">{error}</Typography>
+              <Typography variant="subtitle1">
+                Current campaign: {campaign || "none selected"}
+              </Typography>
             </i>
+            {error && <Alert severity="error">{error}</Alert>}
           </CardContent>
         </Card>
       </Grid>

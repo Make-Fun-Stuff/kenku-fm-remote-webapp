@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { createContext, useState } from "react";
 import "./App.css";
 import ConnectUI from "./components/ConnectUI/ConnectUI";
 import PlaylistController from "./components/PlaylistController/PlaylistController";
@@ -9,8 +9,16 @@ import Soundboards from "./components/Soundboards/Soundboards";
 import Scenes from "./components/Scenes/Scenes";
 import SaveSceneButton from "./components/Scenes/SaveSceneButton";
 
+export interface CampaignContextType {
+  setCampaign: (_: string) => void;
+  campaign?: string;
+}
+
+export const CampaignContext = createContext<CampaignContextType | null>(null);
+
 function App() {
   const [connected, setConnected] = useState(false);
+  const [campaign, setCampaign] = useState<string>();
   return (
     <div className="App">
       {!connected ? (
@@ -19,7 +27,7 @@ function App() {
           <RestartButton />
         </div>
       ) : (
-        <div>
+        <CampaignContext.Provider value={{ campaign, setCampaign }}>
           <PlaylistController connectionFailure={() => setConnected(false)} />
           <SoundboardController connectionFailure={() => setConnected(false)} />
           <SaveSceneButton />
@@ -27,7 +35,7 @@ function App() {
           <Soundboards connectionFailure={() => setConnected(false)} />
           <Scenes />
           <RestartButton />
-        </div>
+        </CampaignContext.Provider>
       )}
     </div>
   );

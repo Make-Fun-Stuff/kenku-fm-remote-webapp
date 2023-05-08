@@ -19,6 +19,8 @@ export interface Scene extends NewScene {
   id: string;
 }
 
+export type CampaignScenes = Record<string, Scene[]>;
+
 const port = 5003;
 
 const getUrl = () => {
@@ -30,7 +32,7 @@ const getUrl = () => {
   return `${url}:${port}`;
 };
 
-export const listScenes = async (): Promise<Scene[]> => {
+export const listScenes = async (): Promise<CampaignScenes> => {
   const response = await fetch(getUrl(), {
     method: "get",
     headers: {
@@ -45,8 +47,26 @@ export const listScenes = async (): Promise<Scene[]> => {
   return response.json();
 };
 
-export const addScene = async (scene: NewScene) => {
+export const addCampaign = async (campaignName: string) => {
   const response = await fetch(getUrl(), {
+    method: "post",
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      Accept: "application/json, text/plain, */*",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ campaignName }),
+  });
+  if (response.status >= 400) {
+    throw Error(
+      `Invalid response from create campaign API: ${response.status}`
+    );
+  }
+  return response.json();
+};
+
+export const addScene = async (campaignName: string, scene: NewScene) => {
+  const response = await fetch(`${getUrl()}/${campaignName}`, {
     method: "post",
     headers: {
       "Access-Control-Allow-Origin": "*",
@@ -61,8 +81,8 @@ export const addScene = async (scene: NewScene) => {
   return response.json();
 };
 
-export const deleteScene = async (id: string) => {
-  const response = await fetch(`${getUrl()}/${id}`, {
+export const deleteScene = async (campaignName: string, sceneId: string) => {
+  const response = await fetch(`${getUrl()}/${campaignName}/${sceneId}`, {
     method: "delete",
     headers: {
       "Access-Control-Allow-Origin": "*",

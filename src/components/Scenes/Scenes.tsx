@@ -1,20 +1,31 @@
 import {
+  Alert,
+  Button,
+  Card,
+  CardContent,
+  Grid,
+  MenuItem,
   Paper,
+  Select,
+  SelectChangeEvent,
   Table,
   TableBody,
   TableContainer,
   TableHead,
   TableRow,
+  TextField,
   Typography,
 } from "@mui/material";
 import TableCell, { tableCellClasses } from "@mui/material/TableCell";
 import { styled } from "@mui/material/styles";
-import { useEffect, useMemo, useState } from "react";
-import { sortBy } from "lodash";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { useCookies } from "react-cookie";
 import { KenkuRemoteConfig } from "../../kenku/kenku";
-import { Scene, listScenes } from "../../scenes/scenes";
+import { CampaignScenes, addCampaign, listScenes } from "../../scenes/scenes";
 import SceneRow from "./SceneRow";
+import { AddRounded } from "@mui/icons-material";
+import { CampaignContext } from "../../App";
+import { CampaignContextType } from "../../App";
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -29,7 +40,15 @@ const StyledTableCell = styled(TableCell)(({ theme }) => ({
 function Scenes() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | undefined>();
-  const [scenes, setScenes] = useState<Scene[]>([]);
+  const [newCampaignError, setNewCampaignError] = useState<string>();
+  const [newCampaignInput, setNewCampaignInput] = useState<string>("");
+  const { campaign, setCampaign } = useContext(
+    CampaignContext
+  ) as CampaignContextType;
+  const [campaignScenes, setCampaignScenes] = useState<CampaignScenes>({});
+
+  const scenes = campaign ? campaignScenes[campaign] : [];
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [cookies, _setCookie] = useCookies(["host", "port"]);
   const kenkuConfig: KenkuRemoteConfig = useMemo(
@@ -41,10 +60,20 @@ function Scenes() {
   );
 
   useEffect(() => {
+    if (!campaign) {
+      const setDefaultCampaign = async () => {
+        const listResponse = await listScenes();
+        setCampaign(Object.keys(listResponse).sort()[0]);
+      };
+      setDefaultCampaign();
+    }
+  }, [campaign, setCampaign]);
+
+  useEffect(() => {
     const interval = setInterval(async () => {
       try {
         const listResponse = await listScenes();
-        setScenes(sortBy(listResponse, (scene) => scene.name));
+        setCampaignScenes(listResponse);
         setError(undefined);
       } catch (error) {
         setError(
@@ -75,6 +104,27 @@ function Scenes() {
       <Typography variant="h5" marginBottom={"20px"}>
         Scenes
       </Typography>
+
+      <Paper sx={{ marginBottom: "15px" }}>
+        <Select
+          value={campaign || "No campaign selected"}
+          label="Campaign"
+          variant="standard"
+          sx={{ width: "100%" }}
+          onChange={(event: SelectChangeEvent) => {
+            setCampaign(event.target.value);
+          }}
+        >
+          {Object.keys(campaignScenes)
+            .sort()
+            .map((name, index) => (
+              <MenuItem key={index} value={name}>
+                {name}
+              </MenuItem>
+            ))}
+        </Select>
+      </Paper>
+
       <TableContainer component={Paper}>
         <Table sx={{ minWidth: 350 }} size="small" aria-label="simple table">
           <TableHead>
@@ -101,6 +151,45 @@ function Scenes() {
           </TableBody>
         </Table>
       </TableContainer>
+
+      <Card sx={{ minWidth: 400, marginTop: "15px" }} raised={true}>
+        <CardContent>
+          <Grid container={true}>
+            <TextField
+              value={newCampaignInput}
+              sx={{ width: "70%" }}
+              label="New Campaign"
+              onChange={(event) => {
+                setNewCampaignInput(event.target.value);
+              }}
+            />
+            <Button
+              sx={{ width: "25%", ml: "5%" }}
+              type="submit"
+              variant="contained"
+              disabled={!newCampaignInput.trim().length}
+              onClick={async () => {
+                try {
+                  await addCampaign(newCampaignInput.trim());
+                  setNewCampaignInput("");
+                } catch (error) {
+                  setNewCampaignError(
+                    error instanceof Error ? error.message : "Unknown error"
+                  );
+                }
+              }}
+              startIcon={<AddRounded />}
+            >
+              Add
+            </Button>
+          </Grid>
+          {newCampaignError && (
+            <Alert sx={{ mt: "10px" }} severity="error">
+              {newCampaignError}
+            </Alert>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
