@@ -88,7 +88,7 @@ function SaveSceneButton() {
               </Button>
             </Grid>
             <i>
-              <Typography variant="subtitle1">
+              <Typography variant="subtitle1" sx={{ marginTop: "20px" }}>
                 Current campaign: {campaign || "none selected"}
               </Typography>
             </i>
