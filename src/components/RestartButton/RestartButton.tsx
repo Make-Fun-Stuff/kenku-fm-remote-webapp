@@ -24,10 +24,9 @@ function RestartButton() {
   ) : (
     <Button
       type="submit"
-      fullWidth
       color="error"
       variant="contained"
-      sx={{ mt: 2, mb: 5 }}
+      sx={{ mt: 2, mb: 5, minWidth: "400px" }}
       onClick={async () => {
         await restart();
       }}
