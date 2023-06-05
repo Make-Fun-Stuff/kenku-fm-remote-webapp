@@ -2,7 +2,7 @@ import { RestartAltRounded } from "@mui/icons-material";
 import { Button } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useCookies } from "react-cookie";
-import { checkRestartAvailable, restart } from "../../restart/restart";
+import { checkRestartAvailable, restart } from "../../shellApi/shell";
 
 function RestartButton() {
   const [restartApiActive, setRestartApiActive] = useState(false);

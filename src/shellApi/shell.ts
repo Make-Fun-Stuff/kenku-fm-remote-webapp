@@ -40,3 +40,33 @@ export const restart = async (): Promise<boolean> => {
   }
   return true;
 };
+
+export const volumeUp = async (): Promise<boolean> => {
+  const response = await fetch(`${getUrl()}/vup`, {
+    method: "post",
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      Accept: "application/json, text/plain, */*",
+      "Content-Type": "application/json",
+    },
+  });
+  if (response.status >= 400) {
+    return false;
+  }
+  return true;
+};
+
+export const volumeDown = async (): Promise<boolean> => {
+  const response = await fetch(`${getUrl()}/vdown`, {
+    method: "post",
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      Accept: "application/json, text/plain, */*",
+      "Content-Type": "application/json",
+    },
+  });
+  if (response.status >= 400) {
+    return false;
+  }
+  return true;
+};

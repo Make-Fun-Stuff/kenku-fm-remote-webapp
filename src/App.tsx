@@ -8,6 +8,7 @@ import SoundboardController from "./components/SoundboardController/SoundboardCo
 import Soundboards from "./components/Soundboards/Soundboards";
 import Scenes from "./components/Scenes/Scenes";
 import SaveSceneButton from "./components/Scenes/SaveSceneButton";
+import ServerVolumeController from "./components/ServerVolumeController/ServerVolumeController";
 
 export interface CampaignContextType {
   setCampaign: (_: string) => void;
@@ -30,6 +31,7 @@ function App() {
         <CampaignContext.Provider value={{ campaign, setCampaign }}>
           <PlaylistController connectionFailure={() => setConnected(false)} />
           <SoundboardController connectionFailure={() => setConnected(false)} />
+          <ServerVolumeController />
           <SaveSceneButton />
           <Playlists connectionFailure={() => setConnected(false)} />
           <Soundboards connectionFailure={() => setConnected(false)} />
