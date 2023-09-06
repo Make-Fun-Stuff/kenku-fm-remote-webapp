@@ -70,3 +70,18 @@ export const volumeDown = async (): Promise<boolean> => {
   }
   return true;
 };
+
+export const bluetoothConnect = async (): Promise<boolean> => {
+  const response = await fetch(`${getUrl()}/btconnect`, {
+    method: "post",
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+      Accept: "application/json, text/plain, */*",
+      "Content-Type": "application/json",
+    },
+  });
+  if (response.status >= 400) {
+    return false;
+  }
+  return true;
+};

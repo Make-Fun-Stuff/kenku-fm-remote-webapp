@@ -6,8 +6,12 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { volumeDown, volumeUp } from "../../shellApi/shell";
-import { VolumeDownRounded, VolumeUpRounded } from "@mui/icons-material";
+import { volumeDown, volumeUp, bluetoothConnect } from "../../shellApi/shell";
+import {
+  VolumeDownRounded,
+  VolumeUpRounded,
+  BluetoothAudioRounded,
+} from "@mui/icons-material";
 
 function ServerVolumeController() {
   return (
@@ -53,6 +57,18 @@ function ServerVolumeController() {
                 <VolumeUpRounded />
               </Button>
             </Stack>
+            <Button
+              style={{ marginTop: 20 }}
+              aria-label="server-bt-connect"
+              variant="contained"
+              onClick={() => {}}
+              onDoubleClick={async (_) => {
+                await bluetoothConnect();
+              }}
+            >
+              <BluetoothAudioRounded />
+              &nbsp;Connect to Bluetooth
+            </Button>
           </CardContent>
         </Card>
       </Grid>
