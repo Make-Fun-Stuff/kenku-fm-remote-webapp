@@ -9,10 +9,13 @@ const getUrl = () => {
   return `${url}:${port}`;
 };
 
-export const checkRestartAvailable = async (): Promise<boolean> => {
-  const url = getUrl();
-  const response = await fetch(url, {
-    method: "get",
+const makeCall = async (
+  method: "get" | "post",
+  path?: string
+): Promise<boolean> => {
+  console.log(`Making call to ${getUrl()}/${path || ""}`);
+  const response = await fetch(`${getUrl()}/${path || ""}`, {
+    method,
     headers: {
       "Access-Control-Allow-Origin": "*",
       Accept: "application/json, text/plain, */*",
@@ -25,20 +28,12 @@ export const checkRestartAvailable = async (): Promise<boolean> => {
   return true;
 };
 
+export const checkRestartAvailable = async (): Promise<boolean> => {
+  return makeCall("get");
+};
+
 export const restart = async (): Promise<boolean> => {
-  const response = await fetch(`${getUrl()}/restart`, {
-    method: "post",
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-      Accept: "application/json, text/plain, */*",
-      "Content-Type": "application/json",
-    },
-    // body: JSON.stringify({}),
-  });
-  if (response.status >= 400) {
-    return false;
-  }
-  return true;
+  return makeCall("post", "restart");
 };
 
 export const volumeUp = async (): Promise<boolean> => {
@@ -57,31 +52,17 @@ export const volumeUp = async (): Promise<boolean> => {
 };
 
 export const volumeDown = async (): Promise<boolean> => {
-  const response = await fetch(`${getUrl()}/vdown`, {
-    method: "post",
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-      Accept: "application/json, text/plain, */*",
-      "Content-Type": "application/json",
-    },
-  });
-  if (response.status >= 400) {
-    return false;
-  }
-  return true;
+  return makeCall("post", "vdown");
 };
 
 export const bluetoothConnect = async (): Promise<boolean> => {
-  const response = await fetch(`${getUrl()}/btconnect`, {
-    method: "post",
-    headers: {
-      "Access-Control-Allow-Origin": "*",
-      Accept: "application/json, text/plain, */*",
-      "Content-Type": "application/json",
-    },
-  });
-  if (response.status >= 400) {
-    return false;
-  }
-  return true;
+  return makeCall("post", "btconnect");
+};
+
+export const startCasting = async (): Promise<boolean> => {
+  return makeCall("post", "caston");
+};
+
+export const stopCasting = async (): Promise<boolean> => {
+  return makeCall("post", "castoff");
 };
